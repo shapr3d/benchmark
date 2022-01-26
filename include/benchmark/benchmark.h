@@ -322,6 +322,15 @@ size_t RunSpecifiedBenchmarks(BenchmarkReporter* display_reporter,
                               BenchmarkReporter* file_reporter,
                               std::string spec);
 
+// TimeUnit is passed to a benchmark in order to specify the order of magnitude
+// for the measured time.
+enum TimeUnit { kNanosecond, kMicrosecond, kMillisecond, kSecond };
+
+TimeUnit GetDefaultTimeUnit();
+
+// Sets the default time unit the benchmarks use
+void SetDefaultTimeUnit(TimeUnit unit);
+
 // If a MemoryManager is registered (via RegisterMemoryManager()),
 // it can be used to collect and report allocation metrics for a run of the
 // benchmark.
@@ -505,10 +514,6 @@ Counter::Flags inline operator|(const Counter::Flags& LHS,
 
 // This is the container for the user-defined counters.
 typedef std::map<std::string, Counter> UserCounters;
-
-// TimeUnit is passed to a benchmark in order to specify the order of magnitude
-// for the measured time.
-enum TimeUnit { kNanosecond, kMicrosecond, kMillisecond, kSecond };
 
 // BigO is passed to a benchmark in order to specify the asymptotic
 // computational
@@ -1090,6 +1095,8 @@ class Benchmark {
 
   virtual void Run(State& state) = 0;
 
+  TimeUnit GetTimeUnit() const;
+
  protected:
   explicit Benchmark(const char* name);
   Benchmark(Benchmark const&);
@@ -1105,7 +1112,10 @@ class Benchmark {
   AggregationReportMode aggregation_report_mode_;
   std::vector<std::string> arg_names_;       // Args for all benchmark runs
   std::vector<std::vector<int64_t> > args_;  // Args for all benchmark runs
+  
   TimeUnit time_unit_;
+  bool use_default_time_unit_;
+  
   int range_multiplier_;
   double min_time_;
   IterationCount iterations_;
